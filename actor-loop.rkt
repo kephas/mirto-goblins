@@ -3,7 +3,7 @@
 (require rebellion/type/enum)
 (require goblins)
 (require goblins/actor-lib/methods)
-(require "../MirtoEmulatorGui.rkt")
+(require "MirtoEmulatorGui.rkt")
 
 
 
