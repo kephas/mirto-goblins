@@ -7,20 +7,26 @@
 
 
 
-;;;;;;;;
-; Start loop
-;;;;;;;;
+;;;;
+; Constants
+;;;;
 
 (define right-wheel 0)
 (define left-wheel 1)
 (define motor-1° 833)
 (define counter-interval 1)
 
+
+;;;;
+; Low-level functions
+;;;;
+
 (define (forward/speed speed)
   (setMotors speed speed))
 
 (define (rotate/speed speed)
   (setMotors speed (- 0 speed)))
+
 
   
 ;;;;;;;;;;;;;;;;
@@ -71,6 +77,9 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Setup and time ticking ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (start-loop time-step)
   (define control-vat (make-vat))
@@ -89,6 +98,3 @@
 
 
 (start-loop .1)
-
-
-
