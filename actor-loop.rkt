@@ -1,72 +1,15 @@
 #lang racket
 
-(require rebellion/type/enum)
-(require goblins)
-(require goblins/actor-lib/methods)
-(require "MirtoEmulatorGui.rkt")
+(require goblins
+         goblins/actor-lib/methods
+         goblins/actor-lib/bootstrap
+
+         "mirto-actors.rkt")
 
 
 
-;;;;
-; Constants
-;;;;
 
-(define right-wheel 0)
-(define left-wheel 1)
-(define motor-1° 833)
-(define counter-interval 1)
-
-
-;;;;
-; Low-level functions
-;;;;
-
-(define (forward/speed speed)
-  (setMotors speed speed))
-
-(define (rotate/speed speed)
-  (setMotors speed (- 0 speed)))
-
-
-  
-;;;;;;;;;;;;;;;;
-;;;; Actors ;;;;
-;;;;;;;;;;;;;;;;
-
-;; low level
-
-(define (^motors bcom)
-  (methods
-   [(stop)
-    (stopMotors)]
-   [(set left right)
-    (setMotors left right)]
-   [(start-forward distance speed)
-    (forward/speed speed)
-    (enableCounters counter-interval)
-    (resetCount right-wheel)
-    (match (spawn-promise-cons)
-      [(cons vow resolver)
-       (setLCDMessage "wait for it" 0)
-       (bcom (^move-stopper bcom resolver right-wheel distance >=))
-       (setLCDMessage "wait for it..." 0)
-       vow])]
-   [(tick time)
-    (setLCDMessage (~v (getCount right-wheel)) 2)]))
-
-(define (^move-stopper bcom resolver wheel final-distance comparison)
-  (methods
-   [(tick time)
-    (let ([current-distance (getCount wheel)])
-      (setLCDMessage "." 0)
-      (if (comparison current-distance final-distance)
-          (begin
-            (stopMotors)
-            (bcom (^motors bcom))
-            (<- resolver 'fulfill current-distance))
-          #f))]))
-
-;; high level
+;; the actor making high-level decisions
 
 (define (^robot bcom motors)
   (lambda ()
@@ -83,14 +26,19 @@
 
 (define (start-loop time-step)
   (define control-vat (make-vat))
+  (define-vat-run c/run control-vat)
+
   (define plan-vat (make-vat))
+  (define-vat-run p/run plan-vat)
+
   (open-asip)
-  (define motors (control-vat 'spawn ^motors))
-  (define robot (plan-vat 'spawn ^robot motors))
-  (plan-vat 'run (lambda () (<- robot)))
+
+  (define lcd (c/run (spawn ^lcd)))
+  (define motors (c/run (spawn ^motors lcd)))
+  (p/run (<- (spawn ^robot motors)))
   (let loop ()
-    (control-vat 'run (lambda ()
-                        (<- motors 'tick (current-milliseconds))))
+    (c/run
+     (<- motors 'tick (current-milliseconds)))
     (sleep time-step)
     (loop)))
   
