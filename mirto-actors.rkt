@@ -50,10 +50,8 @@
     (resetCount right-wheel)
     (match (spawn-promise-cons)
       [(cons vow resolver)
-       ($ lcd "wait for it" 0)
-       (bcom (^move-stopper bcom resolver lcd right-wheel distance >=))
        ($ lcd "wait for it..." 0)
-       vow])]
+       (bcom (^move-stopper bcom resolver lcd right-wheel distance >=) vow)])]
    [(tick time)
     ($ lcd "^motors" 2)
     ($ lcd (~v (getCount right-wheel)) 4)]))
@@ -71,6 +69,6 @@
       (if (comparison current-distance final-distance)
           (begin
             (stopMotors)
-            (bcom (^motors bcom))
-            (<- resolver 'fulfill current-distance))
+            (<- resolver 'fulfill current-distance)
+            (bcom (^motors bcom lcd)))
           #f))]))
