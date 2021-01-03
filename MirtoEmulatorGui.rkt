@@ -143,7 +143,7 @@
 
 ;; Main function that compute the bot position
 (define (position) 
-  (set! delta (* 0.0001 (- leftWheelPwr rightWheelPwr))); reversed
+  (set! delta (* 0.0001 (- rightWheelPwr leftWheelPwr)))
   (set! power (* 0.01 (/ ( + rightWheelPwr leftWheelPwr) 2)))
   ;(set! power (* 0.01 (max leftWheel rightWheel)))
   (set! z (+ z delta))
