@@ -15,8 +15,9 @@
   (lambda ()
     (on (<- motors 'start-forward 100000 200)
         (lambda (distance)
-          (sleep 1)
-          (<- motors 'start-forward 100000 200)))))
+          (on (<- motors 'start-rotate 45 200)
+              (lambda (distance)
+                (<- motors 'start-forward 100000 200)))))))
 
 
 

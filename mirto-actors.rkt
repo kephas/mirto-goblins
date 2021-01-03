@@ -43,17 +43,34 @@
   (methods
    [(stop)
     (stopMotors)]
-   [(set left right)
-    (setMotors left right)]
+   [(set right left)
+    (setMotors right left)]
    [(start-forward distance speed)
     (setMotors speed speed)
     (resetCount right-wheel)
     (match (spawn-promise-cons)
       [(cons vow resolver)
-       ($ lcd "wait for it..." 0)
        (bcom (^move-stopper bcom resolver lcd right-wheel distance >=) vow)])]
+   [(start-rotate-left distance speed)
+    (setMotors speed (* -1 speed))
+    (resetCount left-wheel)
+    (match (spawn-promise-cons)
+      [(cons vow resolver)
+       (bcom (^move-stopper bcom resolver lcd left-wheel distance >=) vow)])]
+   [(start-rotate angle speed)
+    (let ([distance (* motor-1° angle)]
+          [positive? (> angle 0)]
+          [speed+ speed]
+          [speed- (* -1 speed)])
+      (match (spawn-promise-cons)
+        [(cons vow resolver)
+         (if positive?
+             (setMotors speed+ speed-)
+             (setMotors speed- speed+))
+         (resetCount left-wheel)
+         (bcom (^move-stopper bcom resolver lcd left-wheel distance (if positive? >= <=)) vow)]))]
    [(tick time)
-    ($ lcd "^motors" 2)
+    ($ lcd "^motors" 0)
     ($ lcd (~v (getCount right-wheel)) 4)]))
 
 (define (^lcd bcom)
@@ -63,9 +80,8 @@
   (methods
    [(tick time)
     (let ([current-distance (getCount wheel)])
-      ($ lcd "legendary!" 0)
-      ($ lcd "^move-stopper" 2)
-      ($ lcd (~v current-distance) 4)
+      ($ lcd "^move-stopper" 0)
+      ($ lcd (~v current-distance) 2)
       (if (comparison current-distance final-distance)
           (begin
             (stopMotors)
