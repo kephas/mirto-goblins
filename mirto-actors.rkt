@@ -50,7 +50,7 @@
     (resetCount right-wheel)
     (match (spawn-promise-cons)
       [(cons vow resolver)
-       (bcom (^move-stopper bcom resolver lcd right-wheel distance >=) vow)])]
+       (bcom (^move-stopper bcom resolver lcd right-wheel distance (if (> distance 0) >= <=)) vow)])]
    [(start-rotate-left distance speed)
     (setMotors speed (* -1 speed))
     (resetCount left-wheel)
