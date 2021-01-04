@@ -11,13 +11,18 @@
 
 ;; the actor making high-level decisions
 
+(define (square-side remaining motors)
+  (lambda (distance)
+    (if (> remaining 0)
+        (on (<- motors 'start-forward 100000 200)
+            (lambda (distance)
+              (on (<- motors 'start-rotate 90 200)
+                  (square-side (- remaining 1) motors))))
+        #f)))
+
 (define (^robot bcom motors)
   (lambda ()
-    (on (<- motors 'start-forward 100000 200)
-        (lambda (distance)
-          (on (<- motors 'start-rotate 45 200)
-              (lambda (distance)
-                (<- motors 'start-forward 100000 200)))))))
+    ((square-side 4 motors) 0)))
 
 
 
